@@ -162,15 +162,15 @@ function updateSelect() {
   const select = $('bike-select');
   select.innerHTML = '<option value="">Select a bike</option>';
 
-  const reservedIds = reserved.map(bike => bike.id);
+
 
   bikes.forEach(bike => {
-    if (!reservedIds.includes(bike.id)) {
+
       const option = document.createElement('option');
       option.value = bike.id;
       option.text = `${bike.naziv} (${bike.serijskibroj})`;
       select.appendChild(option);
-    }
+
   });
 }
 
@@ -292,17 +292,26 @@ async function saveRes(e) {
   };
 
   try {
-    await fetch(`${API}/api/reservations`, {
+    const response = await fetch(`${API}/api/reservations`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data)
     });
 
-    $('res-form').reset();
-    loadRes();
-    loadReserved();
+    if (!response.ok) {
+      alert('Bicikl je već rezerviran');
+    } else {
+      $('res-form').reset();
+    }
+
+    await loadRes();
+    await loadReserved();
+
   } catch (e) {
-    console.error('Error', e);
+    console.error('Greška u mreži ili fetch-u:', e);
+    alert('Neuspjela komunikacija sa serverom.');
+    await loadRes();
+    await loadReserved();
   }
 }
 

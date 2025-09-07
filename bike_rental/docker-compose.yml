@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:15
+    container_name: bike_rental_db
+    environment:
+      POSTGRES_DB: bike_rental
+      POSTGRES_USER: bike_user
+      POSTGRES_PASSWORD: bike_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: ./backend
+    container_name: bike_rental_app
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://bike_user:bike_password@db:5432/bike_rental
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: bike_rental_frontend
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres_data:
